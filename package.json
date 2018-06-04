@@ -1,0 +1,22 @@
+{
+  "name": "node",
+  "version": "1.0.0",
+  "description": "Advanced Node Concepts\r ===================\r > Learning about Node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PJC-1/Node-JS-Advanced-Concepts.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PJC-1/Node-JS-Advanced-Concepts/issues"
+  },
+  "homepage": "https://github.com/PJC-1/Node-JS-Advanced-Concepts#readme",
+  "dependencies": {
+    "crypto": "^1.0.1"
+  }
+}
