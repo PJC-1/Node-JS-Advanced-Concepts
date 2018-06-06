@@ -1,4 +1,5 @@
 
+
 Advanced Node Concepts
 ===================
 > Learning about Node.js
@@ -85,4 +86,13 @@ Threads
 >// exit back to terminal
 >
 >```
+>
+>For *some* **standard library* function calls the node C++ side and *libuv* decide to do expensive calculations outside of the event loop entirely.
+>
+>They make use of something called a **thread pool**, the **thread pool** is a series of four *threads* that can be used for running computationally intensive tasks.
+>
+>By default *libuv* creates *4* *threads* in this **thread pool**, which means that in addition to the *thread* used for the **event loop** there are **4** other *threads* that can be used to *offload* expensive calculations that need to occur inside of our application.
+>
+>Many of the functions included in the node *standard library* will automatically make use of this *thread pool*.
+>
 >
