@@ -95,4 +95,44 @@ Threads
 >
 >Many of the functions included in the node *standard library* will automatically make use of this *thread pool*.
 >
+>**Example Code illustrating the use of the Thread Pool**:
+>```
+>const crypto = require('crypto');
+>
+>const start = Date.now();
+>
+>crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
+>  console.log('1:', Date.now() - start);
+>});
+>
+>crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
+>  console.log('2:', Date.now() - start);
+>});
+>
+>crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
+>  console.log('3:', Date.now() - start);
+>});
+>
+>crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
+>  console.log('4:', Date.now() - start);
+>});
+>
+>crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
+>  console.log('5:', Date.now() - start);
+>});
+>
+>```
+>
+>**Example Output**:
+>```
+>$ node threads.js
+>4: 1015
+>2: 1060
+>3: 1069
+>1: 1090
+>5: 1819
+>```
+>
+>- The first **4** calls took ```~1``` second to complete and the **5th** call took ```~2``` seconds.
+>- The first **4** calls each got offloaded to one **thread** that existed inside the **thread pool**.  Once the **4** threads were done processing, *node* was able to more on to the **5th** function call.
 >
