@@ -1,5 +1,4 @@
 
-
 Advanced Node Concepts
 ===================
 > Learning about Node.js
@@ -87,52 +86,28 @@ Threads
 >
 >```
 >
->For *some* **standard library* function calls the node C++ side and *libuv* decide to do expensive calculations outside of the event loop entirely.
+>*is the event loop single threaded?*
 >
->They make use of something called a **thread pool**, the **thread pool** is a series of four *threads* that can be used for running computationally intensive tasks.
+>The node *event loop* is single threaded, but some of the functions that included inside of the node *standard library* are run outside of the event, and outside of that single thread (not single threaded).
 >
->By default *libuv* creates *4* *threads* in this **thread pool**, which means that in addition to the *thread* used for the **event loop** there are **4** other *threads* that can be used to *offload* expensive calculations that need to occur inside of our application.
+>Basically, the event loop uses a single thread but a lot of the code that you and I write does not actually execute inside that thread entirely.
 >
->Many of the functions included in the node *standard library* will automatically make use of this *thread pool*.
+>**Questions about threadpools?**
 >
->**Example Code illustrating the use of the Thread Pool**:
->```
->const crypto = require('crypto');
+>Q: *Can we use the threadpool for javascript code or can only nodeJS functions use it?*
+>A: We can write custom JS that uses the thread pool.
 >
->const start = Date.now();
+>Q: *What functions in node std library use the threadpool?*
+>A: All 'fs' module functions. Some crypto stuff. Depends on OS (windows vs unix based).
 >
->crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
->  console.log('1:', Date.now() - start);
->});
+>Q: *How does this threadpool stuff fit into the event loop?*
+>A: Tasks running in the threadpool are the 'pendingOperations' in our code example.
 >
->crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
->  console.log('2:', Date.now() - start);
->});
+>**Questions about OS Async features?**
 >
->crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
->  console.log('3:', Date.now() - start);
->});
+>Q: *What functions in node std library use the OS's async features?*
+>A:  Almost everything around networking for all OS's. Some other stuff is OS specific.
 >
->crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
->  console.log('4:', Date.now() - start);
->});
->
->crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
->  console.log('5:', Date.now() - start);
->});
->
->```
->
->**Example Output**:
->```
->$ node threads.js
->4: 1015
->2: 1060
->3: 1069
->1: 1090
->5: 1819
->```
->
->- The first **4** calls took ```~1``` second to complete and the **5th** call took ```~2``` seconds.
->- The first **4** calls each got offloaded to one **thread** that existed inside the **thread pool**.  Once the **4** threads were done processing, *node* was able to more on to the **5th** function call.
+>Q: *How does this OS async stuff fit into the event loop?*
+>A: Tasks using the underlying OS are reflected in our 'pendingOSTasks' array.
 >
