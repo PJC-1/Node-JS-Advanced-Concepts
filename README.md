@@ -111,3 +111,103 @@ Threads
 >Q: *How does this OS async stuff fit into the event loop?*
 >A: Tasks using the underlying OS are reflected in our 'pendingOSTasks' array.
 >
+>**Interesting Threadpool Example**
+>
+>**Example Code**:
+>```
+>const https = require('https');
+>const crypto = require('crypto');
+>const fs = require('fs');
+>
+>const start = Date.now();
+>
+>function doRequest() {
+>  https
+>  .request('https://www.google.com', res => {
+>    res.on('data', () => {});
+>    res.on('end', () => {
+>      console.log(Date.now() - start);
+>    });
+>  })
+>  .end();
+>}
+>
+>function doHash() {
+>  crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
+>    console.log('Hash:', Date.now() - start);
+>  });
+>}
+>
+>doRequest();
+>
+>fs.readFile('multitask.js', 'utf8', () => {
+>  console.log('FS:', Date.now() - start);
+>});
+>
+>doHash();
+>doHash();
+>doHash();
+>doHash();
+>
+>```
+>
+>**Example Output**:
+>```
+>$ node multitask.js
+>311
+>Hash: 1877
+>FS: 1878
+>Hash: 1888
+>Hash: 1891
+>Hash: 1901
+>```
+>
+>**Output Explination**:
+>- First we see the benchmark from the ```http``` module.
+>- Then we see one console log from the hashing function.
+>- After we see the ```file system``` module call.
+>- Then we see the ```3``` remaining hashing function calls.
+>
+>- There is no way that reading a file off of the hard drive can possibly take ```2``` seconds.
+>- If you comment out all of the hashing function calls and run the file.
+>**Example Code**:
+>```
+>const https = require('https');
+>const crypto = require('crypto');
+>const fs = require('fs');
+>
+>const start = Date.now();
+>
+>function doRequest() {
+>  https
+>  .request('https://www.google.com', res => {
+>    res.on('data', () => {});
+>    res.on('end', () => {
+>      console.log(Date.now() - start);
+>    });
+>  })
+>  .end();
+>}
+>
+>function doHash() {
+>  crypto.pbkdf2('a', 'b', 100000, 512, 'sha512', () => {
+>    console.log('Hash:', Date.now() - start);
+>  });
+>}
+>
+>doRequest();
+>
+>fs.readFile('multitask.js', 'utf8', () => {
+>  console.log('FS:', Date.now() - start);
+>});
+>```
+>
+>**Example Output**:
+>```
+>$ node multitask.js
+>FS: 19
+>185
+>```
+>
+>- It takes ```19``` milliseconds to complete reading off the harddrive, this means that we are seeing some very intersting behavior in the implementation with the hashing function calls since it's taking ```~2``` seconds to complete the ```file system``` read method.
+>
