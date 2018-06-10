@@ -227,3 +227,15 @@ Threads
 >-  However, the ```https``` module does not use the *thread pool*, instead it reaches out directly to the ```operating system``` and leverages the operating system to do all that networking work for us.
 >- If we look at the times it took to complete the different operations, we see that the ```https``` call resolved right away, but we had to wait much longer for all the other function calls for some reason.
 >
+
+Performance
+-------------
+>*Improving Node Performance*
+>- Use Node in ```Cluster Mode```.
+>- Use ```Worker Threads```.
+>
+>*Note*:
+>- It is **Recommended** to *Use Node in 'Cluster' Mode*, for improving performance of your application.
+>- It is considered **Experimental** to *Use Worker Threads*.
+>
+>

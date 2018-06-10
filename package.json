@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/PJC-1/Node-JS-Advanced-Concepts#readme",
   "dependencies": {
-    "crypto": "^1.0.1"
+    "crypto": "^1.0.1",
+    "express": "^4.16.3"
   }
 }
