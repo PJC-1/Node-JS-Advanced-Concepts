@@ -211,3 +211,19 @@ Threads
 >
 >- It takes ```19``` milliseconds to complete reading off the harddrive, this means that we are seeing some very intersting behavior in the implementation with the hashing function calls since it's taking ```~2``` seconds to complete the ```file system``` read method.
 >
+>**Why do we always see exactly one hash console log before the result of the file system?**
+>
+>- Once all the function calls (```fs.readFile``` and the ```4``` ```doHash``` function calls) are properly allocated to the first ```4``` threads in the **thread pool**.
+>- When ```fs``` module call is loaded into thread ```1```, thread ```1``` started to go through the process of the ```fs.readFile``` method, where node goes out to get some information about the file, accesses the hard drive and returns the information, then node goes out and accesses the hard drive again to stream the file contents back to the application, where node returns the file contents to us.
+>- During that first *phase* where ```thread 1``` goes out to the hard drive to get some information about the specified file, the *thread* will basically move on to the next transaction in line (```pbkdf2``` call number ```4```). So ```thread 1``` temporarily forgets about that file system call and starts calculating the hash.
+>- ```thread 2``` will complete and be ready to accept more work, it will see that there's still a pending **file system** call that needs to be worked on. ```thread 2``` will look to see if it has gotten any information back from the hard drive. That information/statistics come back into ```thread 2``` and then continues to wrk on the **file system** call. Makes another follow up request to the hard drive to get the actual file contents. ```thread 2``` processes them and we then see that console log appear.
+>- This is why we alway see one hash get completed before the file system module call.
+>
+>**Why do we always see the HTTP request complete first?**
+>
+>- *Note*, both the ```http``` request and the ```file system``` call are both **asynchronous**, it some amount of time for both of them to complete.
+>- Node makes use of a **thread pool** for some very specific function calls. In particular, almost everything inside of the ```fs``` module makes use of this **thread pool**.
+>- The crypto module function ```pbkdf2``` also makes use of the **thread pool** as well.
+>-  However, the ```https``` module does not use the *thread pool*, instead it reaches out directly to the ```operating system``` and leverages the operating system to do all that networking work for us.
+>- If we look at the times it took to complete the different operations, we see that the ```https``` call resolved right away, but we had to wait much longer for all the other function calls for some reason.
+>
