@@ -257,3 +257,7 @@ Performance
 >
 >To create **worker instances** the *cluster manager* is going to require in the *cluster module* from the node *standard library*. There is one particular function on the **cluster module** called ```fork()``` and whenever we call that ```fork``` function from within the *cluster manager* node internally goes back to our index.js file and it executes it a second time, but it executes it that second time in a slightly different mode. Basically the index.js file is being executed multiple times by node. The very first time it's going to *produce* the **cluster manager** and then every time after that it's going to be producing our **worker instances**.
 >
+>**Use-case where Clustering in Node can be helpful?**
+>
+>If you have some routes inside of your app that usually take a while to process, but you have other routes that are very quick then by using *clustering* you can start up multiple instances of your server that more evenly address all the incoming *requests* that are coming into your application and have more predictable response times.
+>
