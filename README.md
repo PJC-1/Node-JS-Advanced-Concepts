@@ -261,3 +261,190 @@ Performance
 >
 >If you have some routes inside of your app that usually take a while to process, but you have other routes that are very quick then by using *clustering* you can start up multiple instances of your server that more evenly address all the incoming *requests* that are coming into your application and have more predictable response times.
 >
+>**Where Clustering does NOT work out so well**
+>
+>Using ```ab``` (*Apache Benchmark*) to measure performance.
+>
+>The following command will test a single request to ```localhost:3000/```.
+>```
+>$ ab -c 1 -n 1 localhost:3000/
+>```
+>
+>**ab output**:
+>```
+>This is ApacheBench, Version 2.3 <$Revision: 1807734 $>
+>Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+>Licensed to The Apache Software Foundation, http://www.apache.org/
+>Benchmarking localhost (be patient).....done
+>
+>Server Software:
+>Server Hostname:  localhost
+>Server Port:  3000
+>Document Path:  /
+>Document Length:  8 bytes
+>Concurrency Level:  1
+>Time taken for tests: 0.975 seconds
+>Complete requests:  1
+>Failed requests:  0
+>Total transferred:  206 bytes
+>HTML transferred: 8 bytes
+>Requests per second:  1.03 [#/sec] (mean)
+>Time per request: 974.912 [ms] (mean)
+>Time per request: 974.912 [ms] (mean, across all concurrent requests)
+>Transfer rate:  0.21 [Kbytes/sec] received
+>
+>Connection Times (ms)
+>min  mean[+/-sd] median max
+>Connect:  0  0 0.0  0 0
+>Processing: 975  975 0.0  975 975
+>Waiting:  974  974 0.0  974 974
+>Total:  975  975 0.0  975 975
+>```
+>
+>The following command will make ```2``` requests at the **exact** same time to our ```1``` child inside of our cluster, where that ```1``` child only has ```1``` thread available :
+>```
+>$ ab -c 2 -n 2 localhost:3000/
+>```
+>
+>**ab output**:
+>```
+>This is ApacheBench, Version 2.3 <$Revision: 1807734 $>
+>Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+>Licensed to The Apache Software Foundation, http://www.apache.org/
+>Benchmarking localhost (be patient).....done
+>
+>Server Software:
+>Server Hostname:  localhost
+>Server Port:  3000
+>Document Path:  /
+>Document Length:  8 bytes
+>Concurrency Level:  2
+>Time taken for tests: 1.918 seconds
+>Complete requests:  2
+>Failed requests:  0
+>Total transferred:  412 bytes
+>HTML transferred: 16 bytes
+>Requests per second:  1.04 [#/sec] (mean)
+>Time per request: 1917.762 [ms] (mean)
+>Time per request: 958.881 [ms] (mean, across all concurrent requests)
+>Transfer rate:  0.21 [Kbytes/sec] received
+>Connection Times (ms)
+>min  mean[+/-sd] median max
+>Connect:  0  0 0.0  0 0
+>Processing: 974 1446 667.4 1918  1918
+>Waiting:  974 1445 667.5 1917  1917
+>Total:  974 1446 667.4 1918  1918
+>
+>Percentage of the requests served within a certain time (ms)
+>50% 1918
+>66% 1918
+>75% 1918
+>80% 1918
+>90% 1918
+>95% 1918
+>98% 1918
+>99% 1918
+>100% 1918 (longest request)
+>```
+>It takes ```~2``` seconds. Both requests are accepted at the same time, but it can only process ```1``` at a time.
+>
+>Now, we can try the same ```ab``` command, but instead try it will the ```2``` **children** running:
+>```
+>$ ab -c 2 -n 2 localhost:3000/
+>```
+>
+>**ap output**:
+>```
+>This is ApacheBench, Version 2.3 <$Revision: 1807734 $>
+>Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+>Licensed to The Apache Software Foundation, http://www.apache.org/  
+>Benchmarking localhost (be patient).....done
+>
+>Server Software:
+>Server Hostname:  localhost
+>Server Port:  3000
+>Document Path:  /
+>Document Length:  8 bytes
+>Concurrency Level:  2
+>Time taken for tests: 0.928 seconds
+>Complete requests:  2
+>Failed requests:  0
+>Total transferred:  412 bytes
+>HTML transferred: 16 bytes
+>Requests per second:  2.16 [#/sec] (mean)
+>Time per request: 928.056 [ms] (mean)
+>Time per request: 464.028 [ms] (mean, across all concurrent requests)
+>Transfer rate:  0.43 [Kbytes/sec] received
+>Connection Times (ms)
+>min  mean[+/-sd] median max
+>Connect:  0  0 0.0  0 0
+>Processing: 926  927 1.1  928 928
+>Waiting:  925  926 1.3  927 927
+>Total:  926  927 1.1  928 928
+>Percentage of the requests served within a certain time (ms)
+>50%  928
+>66%  928
+>75%  928
+>80%  928
+>90%  928
+>95%  928
+>98%  928
+>99%  928
+>100%  928 (longest request)
+>```
+>
+>From the output we can see that both requests are nearly processed in parallel, where ```1``` request was processed slightly faster than the other. Each being processed by one of the ```2``` children in the cluster. In this use-case we definitely a performance benefit.
+>
+>We can now try *increasing* the number **children** in the cluster to ```6``` and make an ```ab``` request of ```6``` concurrent requests to ```localhost:3000/```:
+>```
+>$ ab -c 6 -n 6 localhost:3000/
+>```
+>
+> **ab output**:
+> ```
+> This is ApacheBench, Version 2.3 <$Revision: 1807734 $>
+>Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+>Licensed to The Apache Software Foundation, http://www.apache.org/
+>Benchmarking localhost (be patient).....done
+>
+>Server Software:
+>Server Hostname:  localhost
+>Server Port:  3000
+>Document Path:  /
+>Document Length:  8 bytes
+>Concurrency Level:  6
+>Time taken for tests: 2.819 seconds
+>Complete requests:  6
+>Failed requests:  0
+>Total transferred:  1236 bytes
+>HTML transferred: 48 bytes
+>Requests per second:  2.13 [#/sec] (mean)
+>Time per request: 2819.378 [ms] (mean)
+>Time per request: 469.896 [ms] (mean, across all concurrent requests)
+>Transfer rate:  0.43 [Kbytes/sec] received
+>Connection Times (ms)
+>min  mean[+/-sd] median max
+>Connect:  0  0 0.0  0 0
+>Processing:  2784 2804  14.9 2811  2819
+>Waiting: 2782 2802  14.6 2810  2817
+>Total: 2784 2804  14.9 2811  2819
+>Percentage of the requests served within a certain time (ms)
+>50% 2811
+>66% 2811
+>75% 2819
+>80% 2819
+>90% 2819
+>95% 2819
+>98% 2819
+>99% 2819
+>100% 2819 (longest request)
+> ```
+>  
+> When we **increase** the number of children in the cluster to ```6```, we see that each request took ```~3``` seconds to complete.
+>
+>Depending on laptop/desktop being used, there is an absolute upper limit to the computer's ability to process incoming requests and do some amount of work. So when we run our code and we do ```6``` at the same time, that means that in those ```6``` separate **threads** that are running ```6``` separate **children** we are bouncing between every hash function called at the exact same time and the **CPU** is trying to do a little bit of work on all the different requests all at the same time.
+>
+>The result is that the code was **not** executed six times faster, instead the result is that it took significantly longer to eventually get a response. The overall performance suffered because the **CPU** was trying to bounce around and process all the incoming requests at exactly the same time.
+>
+>
+>
