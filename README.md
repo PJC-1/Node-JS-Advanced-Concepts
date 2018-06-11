@@ -238,4 +238,22 @@ Performance
 >- It is **Recommended** to *Use Node in 'Cluster' Mode*, for improving performance of your application.
 >- It is considered **Experimental** to *Use Worker Threads*.
 >
+>**Clustering**
+>
+>**Cluster Manager** is responsible for monitoring the health of individual instances of our application that we're going to launch at the same time on our computer. This is regarding multiple instances on ```one``` computer. The *cluster manager* itself doesn't actually execute any application code. The *cluster manager* isn't really responsible for handling incoming requests or fetching data from the database or doing anything like that. Instead, the *cluster manager* is responsible for monitoring the health of each of the individual instances.
+>
+>The *Cluster Manager* can:
+>- Start instances.
+>- Stop an instance.
+>- Restart an instance.
+>- Send an instance data.
+>- Do other kind of administrative tasks.
+>
+>It is up to the individual instances of the server to actually process incoming requests and do things such as access the database, handle authentication, or serve up static files.
+>
+>**Worker Instances**
+>
+>*Worker Instances* are actually responsible for processing incoming requests.
+>
+>To create **worker instances** the *cluster manager* is going to require in the *cluster module* from the node *standard library*. There is one particular function on the **cluster module** called ```fork()``` and whenever we call that ```fork``` function from within the *cluster manager* node internally goes back to our index.js file and it executes it a second time, but it executes it that second time in a slightly different mode. Basically the index.js file is being executed multiple times by node. The very first time it's going to *produce* the **cluster manager** and then every time after that it's going to be producing our **worker instances**.
 >
