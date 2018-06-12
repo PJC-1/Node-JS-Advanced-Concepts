@@ -7,10 +7,6 @@ if (cluster.isMaster) {
   // in child/slave mode
   cluster.fork();
   cluster.fork();
-  cluster.fork();
-  cluster.fork();
-  cluster.fork();
-  cluster.fork();
 } else {
   // Im a child/slave, Im going to act like a server
   // and do nothing else

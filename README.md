@@ -447,4 +447,54 @@ Performance
 >The result is that the code was **not** executed six times faster, instead the result is that it took significantly longer to eventually get a response. The overall performance suffered because the **CPU** was trying to bounce around and process all the incoming requests at exactly the same time.
 >
 >
+>Let now try bring down the number of children to ```2``` and execute the ```ab``` benchmark with ```6``` concurrent tests:
+>
+>**Example Command**:
+>```
+>$ ab -c 6 -n 6 localhost:3000/
+>```
+>
+>**Example Output**:
+>```
+>This is ApacheBench, Version 2.3 <$Revision: 1807734 $>
+>Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+>Licensed to The Apache Software Foundation, http://www.apache.org/
+>Benchmarking localhost (be patient).....done
+>
+>Server Software:
+>Server Hostname:  localhost
+>Server Port:  3000
+>Document Path:  /
+>Document Length:  8 bytes
+>Concurrency Level:  6
+>Time taken for tests: 2.910 seconds
+>Complete requests:  6
+>Failed requests:  0
+>Total transferred:  1236 bytes
+>HTML transferred: 48 bytes
+>Requests per second:  1.99 [#/sec] (mean)
+>Time per request: 2900.743 [ms] (mean)
+>Time per request: 501.624 [ms] (mean, across all concurrent requests)
+>Transfer rate:  0.40 [Kbytes/sec] received
+>Connection Times (ms)
+>min  mean[+/-sd] median max
+>Connect:  0  0 0.1  0 0
+>Processing: 999 1999 891.1 2004  2900
+>Waiting:  997 1999 891.8 2004  2900
+>Total: 1000 2000 891.0 2005  2900
+>Percentage of the requests served within a certain time (ms)
+>50% 2005
+>66% 2005
+>75% 2900
+>80% 2900
+>90% 2900
+>95% 2900
+>98% 2900
+>99% 2900
+>100% 2900 (longest request)
+>```
+>
+>You will notice that the *longest* request took ```~3``` seconds, which is basically the same as when we had ```6``` children in the cluster, but the shortest request was almost a whole second shorter.
+>
+>Generally you will want to match your number of children in your cluster to either the number of **physical cores** or **logical cores** that you have.
 >
