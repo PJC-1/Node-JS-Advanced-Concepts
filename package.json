@@ -18,6 +18,7 @@
   "homepage": "https://github.com/PJC-1/Node-JS-Advanced-Concepts#readme",
   "dependencies": {
     "crypto": "^1.0.1",
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "webworker-threads": "^0.7.15"
   }
 }
